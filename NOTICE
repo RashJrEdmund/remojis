@@ -1,0 +1,16 @@
+This project includes third-party software.
+
+emojibase
+emojibase-data
+Copyright (c) Miles Johnson
+MIT License — https://github.com/milesj/emojibase
+
+@tanstack/react-virtual
+MIT License — https://github.com/TanStack/virtual
+
+@crxjs/vite-plugin
+MIT License — https://github.com/crxjs/chrome-extension-tools
+
+Unicode emoji characters are part of the Unicode Standard.
+Remojis does not ship JoyPixels or other commercial emoji artwork.
+Glyphs are rendered with the operating system's native emoji font.

@@ -1,0 +1,16 @@
+{
+  "name": "remojis",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "dev": "pnpm --filter @remojis/extension dev",
+    "dev:extension": "pnpm --filter @remojis/extension dev",
+    "dev:website": "pnpm --filter @remojis/website dev",
+    "build": "pnpm --filter @remojis/extension build",
+    "build:all": "pnpm -r run build",
+    "build:website": "pnpm --filter @remojis/website build",
+    "lint": "pnpm -r run lint",
+    "icons": "pnpm --filter @remojis/extension icons"
+  }
+}
