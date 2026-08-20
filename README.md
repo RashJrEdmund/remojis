@@ -42,7 +42,7 @@ pnpm install
 ```bash
 pnpm dev              # same as pnpm dev:extension
 pnpm build            # production build → apps/extension/dist
-pnpm icons            # resize root logo.png → extension icons + website favicon
+pnpm icons            # resize logo.png → extension icons + site favicon (see docs/ICONS.md)
 ```
 
 1. Open `chrome://extensions` → enable Developer mode  
@@ -72,6 +72,7 @@ pnpm lint
 
 - [docs/PLAN.md](docs/PLAN.md) — product / engineering notes  
 - [docs/STORE.md](docs/STORE.md) — Chrome Web Store listing draft  
+- [docs/ICONS.md](docs/ICONS.md) — logo → icon sizes (`pnpm icons`)  
 - [NOTICE](NOTICE) — third-party licenses  
 
 ## License

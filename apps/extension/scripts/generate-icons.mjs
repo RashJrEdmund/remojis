@@ -1,3 +1,23 @@
+/**
+ * Generate Remojis toolbar / store icons from the brand logo.
+ *
+ * Source:  repo-root `logo.png` (square PNG with transparency preferred)
+ * Outputs:
+ *   - apps/extension/public/icons/icon{16,32,48,128}.png  (Chrome manifest)
+ *   - apps/website/public/favicon.png                     (copy of 32×32)
+ *
+ * Run from the monorepo root:
+ *   pnpm icons
+ *
+ * Or from this package:
+ *   pnpm --filter @remojis/extension icons
+ *
+ * Requires `sharp` (devDependency of @remojis/extension).
+ * Replace `logo.png`, then re-run this script whenever the brand mark changes.
+ *
+ * See docs/ICONS.md for sizes, Chrome requirements, and website OG assets.
+ */
+
 import { copyFileSync, mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
