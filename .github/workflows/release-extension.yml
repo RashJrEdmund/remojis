@@ -1,0 +1,61 @@
+name: Release extension
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & publish extension zip
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build extension
+        run: pnpm build
+
+      - name: Pack zip
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          ZIP="remojis-extension-${TAG}.zip"
+          # Zip the *contents* of dist so manifest.json is at the archive root
+          (cd apps/extension/dist && zip -r -q "../../../${ZIP}" .)
+          ls -lh "${ZIP}"
+          echo "ZIP_NAME=${ZIP}" >> "$GITHUB_ENV"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ZIP_NAME }}
+          generate_release_notes: true
+          body: |
+            ## Remojis ${{ github.ref_name }}
+
+            Download **`${{ env.ZIP_NAME }}`**, unzip it, then load the folder as an unpacked extension in Chrome.
+
+            Full install steps: https://remojis.orashus.com/#install
+
+            ```
+            chrome://extensions → Developer mode → Load unpacked → select the unzipped folder
+            ```
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

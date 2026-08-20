@@ -6,7 +6,7 @@ export default defineManifest({
   name: 'Remojis',
   version: pkg.version,
   description:
-    'Search, copy, and insert emoji into the page. A fast Unicode emoji keyboard for Chrome.',
+    'Search, stack, and copy Unicode emoji. A fast emoji keyboard for Chrome.',
   icons: {
     16: 'icons/icon16.png',
     32: 'icons/icon32.png',
@@ -22,17 +22,6 @@ export default defineManifest({
       48: 'icons/icon48.png',
     },
   },
-  background: {
-    service_worker: 'src/background/index.ts',
-    type: 'module',
-  },
-  content_scripts: [
-    {
-      js: ['src/content/index.ts'],
-      matches: ['http://*/*', 'https://*/*'],
-      run_at: 'document_idle',
-    },
-  ],
   permissions: ['storage'],
   commands: {
     _execute_action: {

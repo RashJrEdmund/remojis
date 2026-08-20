@@ -14,7 +14,7 @@ export function Hero() {
           >
             Remojis
           </a>
-          <a href="#get" className="btn-ghost px-3! py-2! text-sm">
+          <a href="#install" className="btn-ghost px-3! py-2! text-sm">
             Get extension
           </a>
         </nav>
@@ -35,8 +35,8 @@ export function Hero() {
               className="animate-rise mt-8 flex flex-wrap items-center gap-3"
               style={{ animationDelay: '220ms' }}
             >
-              <a href="#get" className="btn-primary">
-                Install for Chrome
+              <a href="#install" className="btn-primary">
+                Get the extension
               </a>
               <a href="#flow" className="btn-ghost">
                 See how it works

@@ -1,8 +1,9 @@
 import { Reveal } from './reveal'
+import { INSTALL_HASH, RELEASES_URL } from '~/lib/links'
 
 export function FinalCta() {
   return (
-    <section id="get" className="relative px-5 py-24 sm:px-8 lg:px-10">
+    <section id="get" className="relative scroll-mt-8 px-5 py-24 sm:px-8 lg:px-10">
       <div className="mx-auto max-w-6xl">
         <Reveal>
           <div className="relative overflow-hidden rounded-[2rem] border border-[color:var(--ink)]/10 bg-[color-mix(in_srgb,white_55%,transparent)] px-6 py-16 sm:px-12 sm:py-20">
@@ -18,21 +19,22 @@ export function FinalCta() {
             <h2 className="font-display mt-3 max-w-2xl text-4xl leading-[1.05] font-extrabold tracking-[-0.03em] text-[color:var(--ink)] sm:text-6xl">
               Stop hunting. Start stacking.
             </h2>
-            <p className="mt-5 max-w-lg text-lg text-[color:var(--ink-soft)]">
-              Load the unpacked build today, or grab it from the Chrome Web Store
-              when we ship the listing.
+            <p className="mt-5 max-w-xl text-lg text-[color:var(--ink-soft)]">
+              Not on the Chrome Web Store yet (one-time publish fee still
+              pending). Download the zip from GitHub, unpack it, turn on
+              Developer mode, and load the folder unpacked.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a
                 className="btn-primary"
-                href="https://chromewebstore.google.com/"
+                href={RELEASES_URL}
                 rel="noreferrer"
                 target="_blank"
               >
-                Chrome Web Store
+                Download from GitHub
               </a>
-              <a className="btn-ghost" href="#flow">
-                Tour the flow
+              <a className="btn-ghost" href={INSTALL_HASH}>
+                How to install
               </a>
             </div>
           </div>

@@ -15,7 +15,6 @@ import { EmojiGrid } from '~/features/picker/emoji-grid'
 import { SearchBar } from '~/features/picker/search-bar'
 import { SkinToneControl } from '~/features/picker/skin-tone-control'
 import { SettingsPanel } from '~/features/settings/settings-panel'
-import { INSERT_EMOJI, type InsertEmojiResponse } from '~/lib/messages'
 import {
   DEFAULT_SETTINGS,
   loadSettings,
@@ -23,18 +22,6 @@ import {
   saveSettings,
   type Settings,
 } from '~/lib/storage'
-
-type ToastKind = 'copied' | 'inserted' | 'copied-only'
-
-function toastLabel(kind: ToastKind): string {
-  if (kind === 'inserted') {
-    return 'Inserted'
-  }
-  if (kind === 'copied-only') {
-    return 'Copied (no text field)'
-  }
-  return 'Copied'
-}
 
 function previewText(emoji: CatalogEmoji): string {
   return `${emoji.label} (${emoji.hexcode.toLowerCase()})`
@@ -48,7 +35,7 @@ export function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [selection, setSelection] = useState('')
   const [preview, setPreview] = useState<CatalogEmoji | null>(null)
-  const [toast, setToast] = useState<ToastKind | null>(null)
+  const [toast, setToast] = useState<string | null>(null)
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
@@ -93,29 +80,23 @@ export function App() {
 
     try {
       await navigator.clipboard.writeText(selection)
+      setToast('Copied')
     } catch {
-      // Clipboard can fail; still try insert.
+      setToast('Copy failed')
+      return
     }
-
-    let inserted = false
-    try {
-      const response = (await chrome.runtime.sendMessage({
-        type: INSERT_EMOJI,
-        emoji: selection,
-      })) as InsertEmojiResponse | undefined
-      inserted = Boolean(response?.inserted)
-    } catch {
-      inserted = false
-    }
-
-    setToast(inserted ? 'inserted' : 'copied-only')
 
     window.setTimeout(() => {
       window.close()
-    }, 280)
+    }, 900)
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    const target = event.target
+    const inComposeBar =
+      target instanceof HTMLElement &&
+      Boolean(target.closest('[data-remojis-compose]'))
+
     if (event.key === 'Escape') {
       if (query) {
         setQuery('')
@@ -132,6 +113,10 @@ export function App() {
     if (event.key === 'Enter' && (event.metaKey || event.ctrlKey) && selection) {
       event.preventDefault()
       void handleCopy()
+      return
+    }
+
+    if (inComposeBar) {
       return
     }
 
@@ -204,10 +189,11 @@ export function App() {
       <ComposeBar
         previewLabel={preview ? previewText(preview) : null}
         selection={selection}
-        toast={toast ? toastLabel(toast) : null}
+        setSelection={setSelection}
+        toast={toast}
         onClear={() => {
-          setSelection('');
-          setToast(null);
+          setSelection('')
+          setToast(null)
         }}
         onCopy={() => {
           void handleCopy()

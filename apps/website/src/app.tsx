@@ -2,6 +2,7 @@ import { Craft } from './components/craft'
 import { FinalCta } from './components/final-cta'
 import { Hero } from './components/hero'
 import { HowItWorks } from './components/how-it-works'
+import { InstallGuide } from './components/install-guide'
 import { SiteFooter } from './components/site-footer'
 
 export function App() {
@@ -11,6 +12,7 @@ export function App() {
       <Hero />
       <HowItWorks />
       <Craft />
+      <InstallGuide />
       <FinalCta />
       <SiteFooter />
     </div>

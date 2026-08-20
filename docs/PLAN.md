@@ -6,17 +6,17 @@ This is the product + engineering spec used to scaffold the repo.
 
 **Stack:** Vite, React, TypeScript, Tailwind CSS, [@crxjs/vite-plugin](https://crxjs.dev/) (MV3 HMR), `emojibase-data` (Unicode 17 / Emoji 17 dataset).
 
-**v1 click behavior:** copy to clipboard **and** insert into the last focused text field when possible.
+**v1 click behavior:** stack emoji in a compose bar, then **copy to clipboard**. Paste with Ctrl/⌘+V.
 
 ---
 
 ## What we are building
 
-A toolbar popup that feels like [EmojiCopy](https://emojicopy.com/) (search-first, one-click, category browse) with the keyboard-job of [JoyPixels’ Chrome extension](https://chromewebstore.google.com/detail/emoji-keyboard-by-joypixe/ipdjnhgkpapgippgcgkfcbpdpcgifncb) (insert on the current page, recents, skin tones, shortcut).
+A toolbar popup that feels like [EmojiCopy](https://emojicopy.com/) (search-first, category browse, copy) with the keyboard-job of [JoyPixels’ Chrome extension](https://chromewebstore.google.com/detail/emoji-keyboard-by-joypixe/ipdjnhgkpapgippgcgkfcbpdpcgifncb) (recents, skin tones, shortcut) — without requiring host access for v1.
 
-Primary job: **find an emoji in under two seconds and put it where you were typing.**
+Primary job: **find an emoji in under two seconds and get it onto the clipboard.**
 
-Non-goals for v1: accounts, cloud sync, custom sticker packs, shipping JoyPixels (or any third-party) emoji **artwork**, a public website, Firefox/Safari (later).
+Non-goals for v1: page insert, accounts, cloud sync, custom sticker packs, shipping JoyPixels (or any third-party) emoji **artwork**, Firefox/Safari (later).
 
 ---
 
@@ -26,17 +26,17 @@ Take the **jobs**, not the brand, pixels, or assets.
 
 From EmojiCopy:
 
-- Search-first UI; click copies immediately
+- Search-first UI; compose then copy
 - Unicode groups (Smileys, People, Animals, Food, …)
 - Recents; optional glyph size
 - Native emoji so paste matches the OS (and empty-box honesty when the OS is behind Unicode)
 
 From JoyPixels Keyboard:
 
-- Insert into the focused web field, with clipboard fallback
 - Keyboard nav later; diversity / skin-tone control
 - Settings (recent count, size, shortcut)
-- Optional later: undocked window / compose bar
+- Compose / multi-select bar (shipped in v1)
+- Optional later: insert into the focused web field; undocked window
 
 Do **not** copy:
 
@@ -54,10 +54,8 @@ Do **not** copy:
 flowchart LR
   user[User] --> shortcut[Toolbar or command]
   shortcut --> popup[Popup picker]
-  popup --> copy[Clipboard write]
-  popup --> bg[Service worker]
-  bg --> cs[Content script]
-  cs --> field[Last focused editable]
+  popup --> compose[Compose bar]
+  compose --> copy[Clipboard write]
   popup --> storage[chrome.storage.local]
 ```
 
@@ -67,31 +65,32 @@ flowchart LR
 - Category tabs / icon rail (Unicode groups + Recents)
 - Virtualized emoji grid
 - Skin-tone control (people/body only)
-- Toast: “Copied” / “Inserted” / “Copied (no text field)”
-- Footer: settings (size S/M/L, recents count)
+- Settings (size S/M/L, recents count)
+- Compose bar + Copy; toast: “Copied”
 
 **Click pipeline:**
 
 1. Resolve chosen glyph (base + optional skin tone / ZWJ)
-2. `navigator.clipboard.writeText`
-3. Ask background to insert into **last focused** editable (popup steals focus, so we cannot use `document.activeElement` on the page at click time)
-4. Record recents
-5. Close popup after insert (keep open on copy-only if we add a modifier later; v1 can close always)
-
-**Editable targets:** `input` (text-like types), `textarea`, `contenteditable`. Skip password fields. Fallback: clipboard only (PDFs, `chrome://`, iframes we cannot reach).
+2. Append to compose selection; record recents
+3. On Copy: `navigator.clipboard.writeText`
+4. Toast “Copied”, then close popup
 
 ---
 
-## Hard problem: popup steals focus
+## Future improvement: page insert
 
-Opening the extension unfocuses the page. v1 therefore needs a **tiny always-on content script** that:
+Clipboard-only keeps the extension simple: no content script, no host permissions, no focus races. Insert into the last focused field is a **v2 candidate** if we want one-tap paste without Ctrl/⌘+V.
+
+**Why it is hard:** opening the popup unfocuses the page, so `document.activeElement` on the page is useless at click time. Insert would need a **tiny always-on content script** that:
 
 - On `focusin`, remembers the last editable (not page text)
 - On a message, inserts at that node via `execCommand('insertText')` or input/textarea `setRangeText` + `input` events so React/Vue sites update
 
-Privacy story for the store: script does not read page content except at insert time; no analytics.
+**Editable targets (when built):** `input` (text-like types), `textarea`, `contenteditable`. Skip password fields. Fallback: clipboard only (PDFs, `chrome://`, iframes we cannot reach).
 
-**Not v1:** Side Panel (keeps page focus; good v2). Detached `chrome.windows` popup (JoyPixels undock). Compose/multi-line copy bar.
+**Privacy / store:** script must not read or transmit page content except at insert time; justify `http://*/*` / `https://*/*` host access in the listing.
+
+**Also later:** Side Panel (keeps page focus); detached `chrome.windows` popup (JoyPixels undock).
 
 ---
 
@@ -113,26 +112,25 @@ Do **not** drop in `emoji-mart` as the whole UI. Build the picker; reuse **data*
 
 | Piece | Role |
 | --- | --- |
-| Popup | React app: search, grid, settings |
-| Service worker | `commands`, `runtime.onMessage` |
-| Content script | last-focus tracker + insert |
+| Popup | React app: search, grid, compose, settings |
 | `chrome.storage.local` | recents, tone, size, recent count |
 
 **Permissions (minimum):**
 
 - `storage`
-- Host access via content script matches: `http://*/*`, `https://*/*`
 
 **Commands:** `Ctrl+Shift+E` / `Command+Shift+E` → `_execute_action`.
 
 **CSP:** default extension CSP; no remote scripts; emoji JSON bundled.
+
+*(Service worker + content script return if/when page insert ships.)*
 
 ---
 
 ## UX details
 
 - Grid virtualization (`@tanstack/react-virtual`) so ~3k glyphs stay smooth
-- Keyboard in v1: type to search; Enter selects first result; Esc clears / closes
+- Keyboard in v1: type to search; Enter selects first result; Esc clears / closes; Enter in compose submits Copy
 - A11y: `role="grid"`, labels from CLDR names, visible focus
 - Light UI first; follow `prefers-color-scheme`
 - Unsupported OS glyphs: still copy; tooltip that paste may tofu
@@ -141,15 +139,13 @@ Do **not** drop in `emoji-mart` as the whole UI. Build the picker; reuse **data*
 
 ## Testing and release
 
-- Manual: Gmail, Twitter/X, Notion, Google Docs, GitHub, Discord web, `contenteditable` demos, pages with no field
-- iframe / shadow DOM: may fail in v1
+- Manual: copy + paste into Gmail, Twitter/X, Notion, Google Docs, GitHub, Discord web
 - Store: 16/32/48/128 icons, privacy policy URL, single-purpose description
 
 ---
 
 ## Risks
 
-- Insert reliability on heavily controlled editors (Docs, Notion) — clipboard still wins
-- Broad host permission review — justify in store listing
+- Page insert (future): reliability on heavily controlled editors (Docs, Notion); broad host permission review
 - Popup size limits — compact chrome, virtualize grid
 - Dataset updates — bump `emojibase-data` after Unicode releases

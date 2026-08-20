@@ -14,7 +14,7 @@ const STEPS = [
   {
     index: '03',
     title: 'Copy lands where you left off',
-    copy: 'One tap copies the whole string and inserts into the last field you focused — clipboard as backup.',
+    copy: 'One tap copies the whole string. Paste with Ctrl/⌘+V wherever you need it.',
   },
 ] as const
 
