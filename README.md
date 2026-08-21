@@ -1,8 +1,10 @@
 ![image preview](./apps/website/public/og-image.png)
 
+_head to https://chrome.google.com/u/1/webstore/devconsole/register to register for the webstore dev console account_
+
 # Remojis
 
-Search, stack, and copy Unicode emoji from a Chrome toolbar popup — without fighting the OS picker.
+Search, stack, and copy Unicode emoji from a Chrome toolbar popup - without fighting the OS picker.
 
 Remojis is a Manifest V3 Chrome extension (plus a marketing site in the same monorepo). Inspired by the *jobs* of [EmojiCopy](https://emojicopy.com/) and [JoyPixels’ keyboard](https://chromewebstore.google.com/detail/emoji-keyboard-by-joypixe/ipdjnhgkpapgippgcgkfcbpdpcgifncb), not their artwork or branding. Glyphs render with **your OS emoji font**; data comes from [emojibase-data](https://emojibase.dev/) (Emoji / Unicode 17).
 
